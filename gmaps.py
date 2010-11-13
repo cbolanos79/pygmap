@@ -1,3 +1,4 @@
+# -*- encoding: iso-8859-1 -*-
 """Copyright (c) 2011 Cristo Bolaños Trujillo (cbolanos@gmail.com)
 All rights reserved.
 
