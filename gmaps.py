@@ -155,11 +155,12 @@ class GMap3:
         return s
 
 class GMap3InfoWindow:
-    def __init__(self, content = None, pixelOffset = None, position = None, maxWidth = None):
+    def __init__(self, content = None, pixelOffset = None, position = None, maxWidth = None, marker = None):
         self._content = content
         self._pixelOffset = pixelOffset
         self._position = position
         self._maxWidth = maxWidth
+        self._marker = marker
 
     def render(self):
         s = """
