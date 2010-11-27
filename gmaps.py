@@ -154,6 +154,28 @@ class GMap3:
         s = """<div id="%(dom_id)s" style="width: %(width)spx; height: %(height)spx;"></div>""" % self.keys()
         return s
 
+class GMap3InfoWindow:
+    def __init__(self, content, pixelOffset = None, position = None, maxWidth = None):
+        self._content = content
+        self._pixelOffset = pixelOffset
+        self._position = position
+        self._maxWidth = maxWidth
+
+    def render(self):
+        s = """
+        var infowindow = new google.maps.InfoWindow({
+            content: '%s'""" % (self._content)
+
+        if self._pixelOffset:
+            s += ",\n            pixelOffset: %s" % self._pixelOffset
+        if self._position:
+            s += ",\n            position: %s" % self._position
+        if self._maxWidth:
+            s += ",\n            maxWidth: %s" % self._maxWidth
+
+        s += "\n        });"
+        return s
+
 class GMap3Icon:
     def __init__(self, longitude, latitude):
         self._longitude = longitude
@@ -163,6 +185,8 @@ class GMap3Icon:
         return {'longitude': self._longitude,\
                 'latitude': self._latitude}
 
+    def onClick(self, event):
+        self._onclick
     def render(self, map):
         d = self.keys()
         d['map'] = map
@@ -170,3 +194,4 @@ class GMap3Icon:
                       position: new google.maps.LatLng(%(latitude)s, %(longitude)s),
                       map: %(map)s
                   });""" % d
+
