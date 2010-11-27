@@ -155,7 +155,7 @@ class GMap3:
         return s
 
 class GMap3InfoWindow:
-    def __init__(self, content, pixelOffset = None, position = None, maxWidth = None):
+    def __init__(self, content = None, pixelOffset = None, position = None, maxWidth = None):
         self._content = content
         self._pixelOffset = pixelOffset
         self._position = position
@@ -163,9 +163,10 @@ class GMap3InfoWindow:
 
     def render(self):
         s = """
-        var infowindow = new google.maps.InfoWindow({
-            content: '%s'""" % (self._content)
+        var infowindow = new google.maps.InfoWindow({"""
 
+        if self._content:
+            s += "            content: '%s'" % self._content
         if self._pixelOffset:
             s += ",\n            pixelOffset: %s" % self._pixelOffset
         if self._position:
