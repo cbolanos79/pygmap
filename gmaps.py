@@ -94,6 +94,7 @@ class GMap3:
         self._zoom = zoom
         self._dom_id = dom_id
         self._icon_list = []
+        self._info_window_list = []
 
     def keys(self):
         return {'width': self._width,\
@@ -104,11 +105,15 @@ class GMap3:
                 'sensor': self._sensor,\
                 'zoom': self._zoom,\
                 'dom_id': self._dom_id,\
-                'icon_list_size': len(self._icon_list)
+                'icon_list_size': len(self._icon_list),
+                'info_window_list_size': len(self._info_window_list)
                }
 
     def add_icon(self, icon):
         self._icon_list.append(icon)
+
+    def add_info_window(self, info_window):
+        self._info_window_list.append(info_window)
 
     def render_source(self):
         s = """<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=%s"></script>""" % (self._sensor == True and "true" or "false")
@@ -129,10 +134,36 @@ class GMap3:
 
         return s
 
+    def render_info_window_array(self):
+        d = self.keys()
+        d['info_window_list_size'] = len(self._info_window_list)
+
+        # Generate a js array
+        s = """var info_window_array = new Array(%(info_window_list_size)s);""" % (d)
+
+        # Generate a js line to assign each icon into array
+        cont = 0
+        for info_window in self._info_window_list:
+            s += "\ninfo_window_array[%d] = %s" % (cont, info_window.render())
+            
+            # Add events for info windows if any of them has an associated marker
+            if info_window._marker:
+
+                icon_cont = 0
+                for icon in self._icon_list:
+                    if icon == info_window._marker:
+                        s += "google.maps.event.addListener(icon_array[%d], 'click', function() {info_window_array[%s].open(map, icon_array[%d]);});" % (icon_cont, cont, icon_cont)
+                icon_cont += 1
+            cont += 1
+            
+
+        return s
+
     def render_init_map(self):
         # Dict holding every key needed to format js
         d = self.keys()
         d['icon_array'] = self.render_icon_array()
+        d['info_window_array'] = self.render_info_window_array()
 
         s = """
         <script type="text/javascript">
@@ -145,6 +176,7 @@ class GMap3:
                 };
                 var map = new google.maps.Map(document.getElementById("%(dom_id)s"), opts);
                 %(icon_array)s
+                %(info_window_array)s
             }
         </script>
         """ % d
