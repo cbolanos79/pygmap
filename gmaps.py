@@ -164,7 +164,7 @@ class GMap3InfoWindow:
 
     def render(self):
         s = """
-        var infowindow = new google.maps.InfoWindow({"""
+        new google.maps.InfoWindow({"""
 
         if self._content:
             s += "            content: '%s'" % self._content
