@@ -1,7 +1,7 @@
 import unittest
 import sys
 sys.path.append("..")
-from gmaps import GMap3
+from gmaps import *
 
 class TestGMap3(unittest.TestCase):
     def setUp(self):
@@ -34,5 +34,12 @@ class TestGMap3(unittest.TestCase):
         except e, GMap3InvalidZoomValue:
             pass
 
+    def testInvalidEventType(self):
+        m = GMap3(self.width, self.height, self.longitude, self.latitude, zoom = -1)
+        try:
+            m.add_event("foo", "")
+        except e, GMap3InvalidEventType:
+            pass
+            
 if __name__ == 'main':
     unittest.main() 

@@ -51,6 +51,9 @@ class GMap3InvalidSensorValue(GMap3Exception):
 class GMap3InvalidZoomValue(GMap3Exception):
     pass
 
+class GMap3InvalidEventType(GMap3Exception):
+    pass
+
 class GMap3IconException(Exception):
     def __init__(self, value):
         self.value = value
@@ -63,6 +66,14 @@ class GMap3:
     HYBRID = "MapTypeId.HYBRID"
     TERRAIN = "MapTypeId.TERRAIN"
     _valid_map_type = [ROADMAP, SATELLITE, HYBRID, TERRAIN]
+
+    CLICK = "click"
+    DBLCLICK = "dblclick"
+    MOUSEUP = "mouseup"
+    MOUSEDOWN = "mousedown"
+    MOUSEOVER = "mouseover"
+    MOUSEOUT = "mouseout"
+    _valid_event_type = [CLICK, DBLCLICK, MOUSEUP, MOUSEDOWN, MOUSEOVER, MOUSEOUT]
 
     def __init__(self, width, height, longitude, latitude, map_type = ROADMAP, zoom = 5, dom_id = "map", sensor = False):
         # Map type must be valid
@@ -95,6 +106,7 @@ class GMap3:
         self._dom_id = dom_id
         self._icon_list = []
         self._info_window_list = []
+        self._event_list = []
 
     def keys(self):
         return {'width': self._width,\
@@ -114,6 +126,11 @@ class GMap3:
 
     def add_info_window(self, info_window):
         self._info_window_list.append(info_window)
+
+    def add_event(self, event_type, js):
+        if event_type not in self._valid_event_type:
+            raise GMap3InvalidEventType
+        self._event_list.append((event_type, js))
 
     def render_source(self):
         s = """<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=%s"></script>""" % (self._sensor == True and "true" or "false")
@@ -159,11 +176,18 @@ class GMap3:
 
         return s
 
+    def render_event_array(self):
+        s = ""
+        for event in self._event_list:
+            s += "\ngoogle.maps.event.addListener(map, '%s', function(event){ %s });" % (event[0], event[1])
+        return s
+        
     def render_init_map(self):
         # Dict holding every key needed to format js
         d = self.keys()
         d['icon_array'] = self.render_icon_array()
         d['info_window_array'] = self.render_info_window_array()
+        d['event_array'] = self.render_event_array()
 
         s = """
         <script type="text/javascript">
@@ -177,6 +201,7 @@ class GMap3:
                 var map = new google.maps.Map(document.getElementById("%(dom_id)s"), opts);
                 %(icon_array)s
                 %(info_window_array)s
+                %(event_array)s
             }
         </script>
         """ % d
